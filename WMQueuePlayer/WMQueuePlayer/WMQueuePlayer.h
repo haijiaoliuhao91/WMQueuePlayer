@@ -12,26 +12,6 @@
 #import <AVFoundation/AVFoundation.h>
 
 
-
-
-
-
-
-/*
-@protocol WMQueuePlayerDataSource <NSObject>
-
-@required
-
-//需要播放多少个视频
--(NSInteger )numberOfItemsInQueuePlayer:(WMQueuePlayer *)wmplayer;
-
-@required
-//当前播放的item
--(AVPlayerItem *)wmplayer:(WMQueuePlayer *)wmplayer currentPlayerItem:(AVPlayerItem *)item;
-
-
-@end
-*/
 @protocol WMQueuePlayerDelegate <NSObject>
 
 @optional

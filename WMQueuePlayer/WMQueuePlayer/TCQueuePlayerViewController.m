@@ -80,10 +80,19 @@ static const CGFloat kControlsAnimationDuration = 0.2f;
     return self;
 }
 
+- (void)setupPlayer
+{
+    _playerLayer = [AVPlayerLayer playerLayerWithPlayer:self.player];
+    [self.playerLayer setVideoGravity:AVLayerVideoGravityResizeAspect];
+    [self.playerLayer setFrame:CGRectMake(0,
+                                          self.view.bounds.size.height/2 - self.view.bounds.size.height/2,
+                                          self.view.bounds.size.width,
+                                          self.view.bounds.size.height)];
+    
+    [self.view.layer addSublayer:self.playerLayer];
+}
 
 #pragma mark - View Lifecycle
-
-
 - (void)viewDidLoad
 {
     [super viewDidLoad];
@@ -94,6 +103,36 @@ static const CGFloat kControlsAnimationDuration = 0.2f;
     [self setupPlayer];
     [self setupControls];
     [self setState:TCQueuePlayerControlsStateVisible];
+}
+- (void)setupControls
+{
+    _topControlsView = [[UIView alloc] initWithFrame:CGRectMake(0,
+                                                                0,
+                                                                self.view.frame.size.width,
+                                                                50.0f)];
+    [self.topControlsView setAutoresizingMask:UIViewAutoresizingFlexibleWidth];
+    [self.topControlsView setBackgroundColor:[UIColor darkGrayColor]];
+    
+    _bottomControlsView = [[UIView alloc] initWithFrame:CGRectMake(0,
+                                                                   self.view.frame.size.height - 50.0f,
+                                                                   self.view.frame.size.width,
+                                                                   50.0f)];
+    [self.bottomControlsView setAutoresizingMask:UIViewAutoresizingFlexibleWidth];
+    [self.bottomControlsView setBackgroundColor:[UIColor darkGrayColor]];
+    
+    UITapGestureRecognizer *tapGesture = [[UITapGestureRecognizer alloc]
+                                          initWithTarget:self
+                                          action:@selector(didTapControlsView:)];
+    [tapGesture setNumberOfTapsRequired:1];
+    [tapGesture setNumberOfTouchesRequired:1];
+    
+    [self.view addGestureRecognizer:tapGesture];
+    [self.view addSubview:self.topControlsView];
+    [self.view addSubview:self.bottomControlsView];
+    
+    [self setupButtons];
+    [self setupProgressSlider];
+    [self setupAudioSlider];
 }
 
 - (void)didReceiveMemoryWarning
@@ -116,48 +155,6 @@ static const CGFloat kControlsAnimationDuration = 0.2f;
 #pragma mark - Controls Setup
 
 
-- (void)setupPlayer
-{
-    _playerLayer = [AVPlayerLayer playerLayerWithPlayer:self.player];
-    [self.playerLayer setVideoGravity:AVLayerVideoGravityResizeAspect];
-    [self.playerLayer setFrame:CGRectMake(0,
-                                          self.view.bounds.size.height/2 - self.view.bounds.size.height/2,
-                                          self.view.bounds.size.width,
-                                          self.view.bounds.size.height)];
-
-    [self.view.layer addSublayer:self.playerLayer];
-}
-
-- (void)setupControls
-{
-    _topControlsView = [[UIView alloc] initWithFrame:CGRectMake(0,
-                                                                0,
-                                                                self.view.frame.size.width,
-                                                                50.0f)];
-    [self.topControlsView setAutoresizingMask:UIViewAutoresizingFlexibleWidth];
-    [self.topControlsView setBackgroundColor:[UIColor darkGrayColor]];
-    
-    _bottomControlsView = [[UIView alloc] initWithFrame:CGRectMake(0,
-                                                                   self.view.frame.size.height - 50.0f,
-                                                                   self.view.frame.size.width,
-                                                                   50.0f)];
-    [self.bottomControlsView setAutoresizingMask:UIViewAutoresizingFlexibleWidth];
-    [self.bottomControlsView setBackgroundColor:[UIColor darkGrayColor]];
-    
-    UITapGestureRecognizer *tapGesture = [[UITapGestureRecognizer alloc]
-                                           initWithTarget:self
-                                                   action:@selector(didTapControlsView:)];
-    [tapGesture setNumberOfTapsRequired:1];
-    [tapGesture setNumberOfTouchesRequired:1];
-    
-    [self.view addGestureRecognizer:tapGesture];
-    [self.view addSubview:self.topControlsView];
-    [self.view addSubview:self.bottomControlsView]; 
-    
-    [self setupButtons];
-    [self setupProgressSlider];
-    [self setupAudioSlider];
-}
 
 - (void)setupButtons
 {

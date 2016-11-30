@@ -109,13 +109,12 @@
 }
 
 - (void)lastItem {
-    
+
     if (_playedUrls.count > 0) {
         
         NSURL *url = _playedUrls[0];
         [_nextUrls insertObject:url atIndex:0];
         [_playedUrls removeObjectAtIndex:0];
-        
         [_queuePlayer advanceToNextItem];
         [_queuePlayer removeAllItems];
         AVPlayerItem *item = [AVPlayerItem playerItemWithURL:url];
@@ -123,7 +122,7 @@
             [_queuePlayer insertItem:item afterItem:nil];
         }
         [_queuePlayer play];
-        _isPlaying = true;
+        _isPlaying = YES;
     }
 }
 
@@ -145,7 +144,7 @@
             }
         }
         
-        _isPlaying = true;
+        _isPlaying = YES;
         [_queuePlayer play];
     }
 }
@@ -153,19 +152,21 @@
 
 
 - (void)play {
-
-    
-    [self.queuePlayer play];
-    _isPlaying = true;
+    if (_isPlaying==NO) {
+        [self.queuePlayer play];
+        _isPlaying = YES;
+    }
 }
 
 - (void)pause {
-    [self.queuePlayer pause];
-    _isPlaying = true;
+    if (_isPlaying==YES) {
+        [self.queuePlayer pause];
+        _isPlaying = NO;
+    }
 }
 
 - (void)playerItemDidEndPlay:(NSNotification *)tifi {
-    _isPlaying = false;
+    _isPlaying = NO;
     if ([_delegate respondsToSelector:@selector(queuePlayerEndPlayed:)]) {
         
         AVPlayerItem *item = tifi.object;
