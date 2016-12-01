@@ -34,7 +34,7 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];
-    _queuePlayer = [[WMQueuePlayer alloc]initWithFrame:CGRectMake(0, 0, self.view.bounds.size.width, 300)];
+    _queuePlayer = [[WMQueuePlayer alloc]initWithFrame:CGRectMake(0, 65, self.view.bounds.size.width, 0.75*(self.view.bounds.size.width))];
     _queuePlayer.backgroundColor = [UIColor lightGrayColor];
     NSMutableArray *temURLArray = [NSMutableArray array];
     for (NSString *aUrlString in self.urlArray) {
@@ -51,12 +51,11 @@
 -(void)touchesBegan:(NSSet<UITouch *> *)touches withEvent:(UIEvent *)event{
     [super touchesBegan:touches withEvent:event];
 
-    if (_queuePlayer.isPlaying) {
-        [_queuePlayer pause];
-    }else{
-        [_queuePlayer play];
-    }
-//    [_queuePlayer nextItem];
+//    if (_queuePlayer.isPlaying) {
+//        [_queuePlayer pause];
+//    }else{
+//        [_queuePlayer play];
+//    }
     
     return;
     

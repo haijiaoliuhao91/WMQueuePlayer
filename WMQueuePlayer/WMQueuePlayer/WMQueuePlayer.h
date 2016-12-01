@@ -29,13 +29,6 @@
 @property (nonatomic, strong,) AVQueuePlayer   *queuePlayer;
 @property (nonatomic, assign) id<WMQueuePlayerDelegate> delegate;
 
-/**
- *  播放进度回调
- */
-@property (nonatomic, copy) void(^progress)(NSTimeInterval currentTime, NSTimeInterval duration);
-
-
-
 
 /**
  *playerLayer,可以修改frame
@@ -44,10 +37,27 @@
 
 
 
+/**
+ *  底部操作工具栏
+ */
+@property (nonatomic,strong ) UIImageView         *bottomView;
+/**
+ *  顶部操作工具栏
+ */
+@property (nonatomic,strong ) UIImageView         *topView;
 
-
-
-
+/**
+ *  WMQueuePlayer内部一个UIView，所有的控件统一管理在此view中
+ */
+@property (nonatomic,strong) UIView        *contentView;
+/**
+ *  控制全屏的按钮
+ */
+@property (nonatomic,retain ) UIButton       *fullScreenBtn;
+/**
+ *  播放暂停按钮
+ */
+@property (nonatomic,retain ) UIButton       *playOrPauseBtn;
 /**
  *  是否正在播放
  */

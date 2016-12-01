@@ -9,22 +9,6 @@
             shouldBeEnabled = "Yes"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
-            filePath = "WMQueuePlayer/ViewController.m"
-            timestampString = "502104545.726272"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "25"
-            endingLineNumber = "25"
-            landmarkName = "-init"
-            landmarkType = "7">
-         </BreakpointContent>
-      </BreakpointProxy>
-      <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
-            shouldBeEnabled = "Yes"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
             filePath = "WMQueuePlayer/WMQueuePlayer/TCQueuePlayerViewController.m"
             timestampString = "501409941.002543"
             startingColumnNumber = "9223372036854775807"
@@ -73,12 +57,12 @@
             shouldBeEnabled = "Yes"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
-            filePath = "WMQueuePlayer/ViewController.m"
-            timestampString = "502104545.726272"
+            filePath = "WMQueuePlayer/WMQueuePlayer/WMQueuePlayer.m"
+            timestampString = "502278442.392773"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "32"
-            endingLineNumber = "32"
+            startingLineNumber = "43"
+            endingLineNumber = "43"
             landmarkName = "-init"
             landmarkType = "7">
          </BreakpointContent>
@@ -90,12 +74,12 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "WMQueuePlayer/WMQueuePlayer/WMQueuePlayer.m"
-            timestampString = "502081833.726499"
+            timestampString = "502279432.680454"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "28"
-            endingLineNumber = "28"
-            landmarkName = "-init"
+            startingLineNumber = "262"
+            endingLineNumber = "262"
+            landmarkName = "-play"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
@@ -106,12 +90,28 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "WMQueuePlayer/WMQueuePlayer/WMQueuePlayer.m"
-            timestampString = "502081818.03283"
+            timestampString = "502279629.650589"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "23"
-            endingLineNumber = "23"
-            landmarkName = "-initWithFrame:"
+            startingLineNumber = "277"
+            endingLineNumber = "277"
+            landmarkName = "-PlayOrPause:"
+            landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "Yes"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "WMQueuePlayer/WMQueuePlayer/WMQueuePlayer.m"
+            timestampString = "502279490.326902"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "269"
+            endingLineNumber = "269"
+            landmarkName = "-pause"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
