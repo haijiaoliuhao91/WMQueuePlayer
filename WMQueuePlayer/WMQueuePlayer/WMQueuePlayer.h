@@ -26,7 +26,7 @@
 /**
  *  AVQueuePlayer 继承于 AVPlayer，所以可以播放视频、音频列表
  */
-@property (nonatomic, strong,) AVQueuePlayer   *queuePlayer;
+@property (nonatomic, strong) AVQueuePlayer   *queuePlayer;
 @property (nonatomic, assign) id<WMQueuePlayerDelegate> delegate;
 
 
@@ -62,14 +62,18 @@
  *  是否正在播放
  */
 @property (nonatomic, assign, readonly) BOOL    isPlaying;
+/**
+ *  当前播放器播放的视频资源index，如果没有播放，返回-1
+ */
+@property (nonatomic, assign) NSInteger    currentIndex;
 
 /**
  *  设置播放列表
  *
  *  @param urls  列表url
- *  @param index 要播放的元素位置
+ *  @param playIndex  要播放的元素位置，不设置默认为0开始播放
  */
-- (void)setUrls:(NSArray <NSURL *>*)urls index:(NSInteger)index;
+- (void)setUrls:(NSArray <NSURL *>*)urls playIndex:(NSInteger)playIndex;
 
 /**
  *  播放上一个

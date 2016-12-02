@@ -40,9 +40,9 @@
     for (NSString *aUrlString in self.urlArray) {
         [temURLArray addObject:[NSURL URLWithString:aUrlString]];
     }
-    [_queuePlayer setUrls:temURLArray index:0];
-    [_queuePlayer play];
+    [_queuePlayer setUrls:temURLArray playIndex:1];
     [self.view addSubview:_queuePlayer];
+    [_queuePlayer play];
 }
 - (void)didReceiveMemoryWarning {
     [super didReceiveMemoryWarning];

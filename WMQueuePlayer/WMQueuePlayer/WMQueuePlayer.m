@@ -15,8 +15,7 @@
 #define WMQueuePlayerImage(file)      [UIImage imageNamed:WMQueuePlayerSrcName(file)] ? :[UIImage imageNamed:WMQueuePlayerFrameworkSrcName(file)]
 
 @interface WMQueuePlayer ()<UIGestureRecognizerDelegate>{
-    NSMutableArray      *_nextUrls;
-    NSMutableArray      *_playedUrls;
+    NSMutableArray *dataSource;
   }
 //监听播放起状态的监听者
 @property (nonatomic ,strong) id playbackTimeObserver;
@@ -27,6 +26,7 @@
 @property (nonatomic,strong) UILabel        *leftTimeLabel;
 @property (nonatomic,strong) UILabel        *rightTimeLabel;
 @property (nonatomic, strong)NSDateFormatter *dateFormatter;
+@property (nonatomic, assign) BOOL isDragingSlider;//是否正在拖曳UISlider，默认为NO
 
 @end
 
@@ -35,29 +35,31 @@
 
 -(instancetype)initWithFrame:(CGRect)frame{
     if (self = [super initWithFrame:frame]) {
-        [self prepare];
+        [self setupUI];
     }
     return self;
+}
+-(void)awakeFromNib{
+    [super awakeFromNib];
+    [self setupUI];
 }
 - (instancetype)init {
     self = [super init];
     if (self) {
-        [self prepare];
+        [self setupUI];
     }
     return self;
 }
--(void)prepare{
+-(void)setupUI{
     [[AVAudioSession sharedInstance] setCategory:AVAudioSessionCategoryPlayback error:nil];
     [[AVAudioSession sharedInstance] setActive:true error:nil];
     [self setAutoresizesSubviews:NO];
 
-    
     //wmplayer内部的一个view，用来管理子视图
     self.contentView = [[UIView alloc]init];
     self.contentView.backgroundColor = [UIColor blackColor];
     [self addSubview:self.contentView];
     //autoLayout contentView
-
     [self.contentView mas_makeConstraints:^(MASConstraintMaker *make) {
         make.edges.equalTo(self);
     }];
@@ -98,10 +100,8 @@
     self.playOrPauseBtn = [UIButton buttonWithType:UIButtonTypeCustom];
     self.playOrPauseBtn.showsTouchWhenHighlighted = YES;
     [self.playOrPauseBtn addTarget:self action:@selector(PlayOrPause:) forControlEvents:UIControlEventTouchUpInside];
-    
     [self.playOrPauseBtn setImage:WMQueuePlayerImage(@"pause") forState:UIControlStateNormal];
     [self.playOrPauseBtn setImage:WMQueuePlayerImage(@"play") forState:UIControlStateSelected];
-    
     [self.bottomView addSubview:self.playOrPauseBtn];
     //autoLayout _playOrPauseBtn
     [self.playOrPauseBtn mas_makeConstraints:^(MASConstraintMaker *make) {
@@ -151,9 +151,7 @@
         make.right.equalTo(self.bottomView).with.offset(-45);
         make.center.equalTo(self.bottomView);
     }];
-    
-    
-    
+
     //leftTimeLabel显示左边的时间进度
     self.leftTimeLabel = [[UILabel alloc]init];
     self.leftTimeLabel.textAlignment = NSTextAlignmentLeft;
@@ -185,26 +183,33 @@
         make.bottom.equalTo(self.bottomView).with.offset(0);
     }];
     self.rightTimeLabel.text = [self convertTime:0.0];//设置默认值
-
-
-    
-    
-    _playedUrls = [NSMutableArray arrayWithCapacity:0];
-    _nextUrls = [NSMutableArray arrayWithCapacity:0];
-    _queuePlayer = [AVQueuePlayer queuePlayerWithItems:@[]];
-    self.playerLayer = [AVPlayerLayer playerLayerWithPlayer:_queuePlayer];
-    self.playerLayer.frame = self.bounds;
-    self.playerLayer.videoGravity = AVLayerVideoGravityResize;
-    [self.contentView.layer insertSublayer:_playerLayer atIndex:0];
+    dataSource = [NSMutableArray array];
+    self.currentIndex = -1;
+}
+-(void)setQueuePlayer{
+    if (self.queuePlayer==nil) {
+        self.queuePlayer = [AVQueuePlayer queuePlayerWithItems:dataSource];
+        self.playerLayer = [AVPlayerLayer playerLayerWithPlayer:self.queuePlayer];
+        self.playerLayer.frame = self.bounds;
+        self.playerLayer.videoGravity = AVLayerVideoGravityResize;
+        [self.contentView.layer insertSublayer:_playerLayer atIndex:0];
+        if (self.currentIndex!=-1) {
+            AVPlayerItem *readyToPlayItem = [dataSource objectAtIndex:self.currentIndex];
+                    AVPlayerItem *currentPlayItem = self.queuePlayer.currentItem;
+                    if ([self.queuePlayer canInsertItem:readyToPlayItem afterItem:currentPlayItem]) {
+                        [self.queuePlayer insertItem:readyToPlayItem afterItem:currentPlayItem];
+                        [self.queuePlayer removeItem:currentPlayItem];
+                        [self play];
+                    }
+        }
+    }
+}
+-(void)addPlayerTimeObserver{
     __weak typeof(self) weakSelf = self;
- self.playbackTimeObserver =  [_queuePlayer addPeriodicTimeObserverForInterval:CMTimeMake(1.0, NSEC_PER_SEC) queue:dispatch_get_main_queue() usingBlock:^(CMTime time) {
+    self.playbackTimeObserver =  [self.queuePlayer addPeriodicTimeObserverForInterval:CMTimeMake(1.0, NSEC_PER_SEC) queue:dispatch_get_main_queue() usingBlock:^(CMTime time) {
         [weakSelf syncSlider];
     }];
-    
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(playerItemDidEndPlay:) name:AVPlayerItemDidPlayToEndTimeNotification object:_queuePlayer.currentItem];
-
 }
-
 - (void)removePlayerTimeObserver
 {
     [self.queuePlayer removeTimeObserver:self.playbackTimeObserver];
@@ -226,12 +231,15 @@
         float maxValue = [self.progressSlider maximumValue];
         double currentTime = CMTimeGetSeconds([self.queuePlayer currentTime]);
         [self.progressSlider setMaximumValue:duration];
-
-        
         long long nowTime = self.queuePlayer.currentItem.currentTime.value/self.queuePlayer.currentItem.currentTime.timescale;
         self.leftTimeLabel.text = [self convertTime:nowTime];
         self.rightTimeLabel.text = [self convertTime:duration];
-        [self.progressSlider setValue:(maxValue - minValue) * currentTime / duration + minValue];
+        
+        if (self.isDragingSlider==YES) {//拖拽slider中，不更新slider的值
+            
+        }else if(self.isDragingSlider==NO){
+            [self.progressSlider setValue:(maxValue - minValue) * currentTime / duration + minValue];
+        }
     }
 }
 
@@ -248,12 +256,13 @@
 #pragma mark
 #pragma mark--开始拖曳sidle
 - (void)stratDragSlide:(UISlider *)slider{
-
+    self.isDragingSlider = YES;
 }
 #pragma mark
 #pragma mark - 播放进度
 - (void)updateProgress:(UISlider *)slider{
-//    [self.queuePlayer seekToTime:CMTimeMakeWithSeconds(slider.value, _currentItem.currentTime.timescale)];
+    self.isDragingSlider = NO;
+    [self.queuePlayer seekToTime:CMTimeMakeWithSeconds(slider.value,self.queuePlayer.currentItem.currentTime.timescale)];
 }
 - (void)fullScreenAction:(UIButton *)sender{
     NSLog(@"fullScreenAction");
@@ -270,7 +279,6 @@
     if (_isPlaying==YES) {
         [self.queuePlayer pause];
         self.playOrPauseBtn.selected = YES;
-
         _isPlaying = NO;
     }
 }
@@ -282,109 +290,106 @@
         [self pause];
     }
 }
-
-
 - (void)resetUrls:(NSArray<NSURL *> *)urls {
-    [_queuePlayer removeAllItems];
-    [_playedUrls removeAllObjects];
-    [_nextUrls removeAllObjects];
-    [_nextUrls addObjectsFromArray:urls];
+    [self.queuePlayer removeAllItems];
     
     AVPlayerItem *item = [AVPlayerItem playerItemWithURL:urls[0]];
-    if ([_queuePlayer canInsertItem:item afterItem:nil]) {
-        [_queuePlayer insertItem:item afterItem:nil];
+    if ([self.queuePlayer canInsertItem:item afterItem:nil]) {
+        [self.queuePlayer insertItem:item afterItem:nil];
     }
+    [self addItemsDidPlayToEndNotifications];
 }
 
 - (void)addUrls:(NSArray<NSURL *> *)urls {
     
-    [_nextUrls addObjectsFromArray:urls];
     
     NSArray *playItems = _queuePlayer.items;
     if (playItems.count == 0) {
         
         AVPlayerItem *item = [AVPlayerItem playerItemWithURL:urls[0]];
-        if ([_queuePlayer canInsertItem:item afterItem:nil]) {
-            [_queuePlayer insertItem:item afterItem:nil];
+        if ([self.queuePlayer canInsertItem:item afterItem:nil]) {
+            [self.queuePlayer insertItem:item afterItem:nil];
+        }
+    }
+    [self addItemsDidPlayToEndNotifications];
+}
+
+- (void)setUrls:(NSArray <NSURL *>*)urls playIndex:(NSInteger)playIndex{
+    if (playIndex) {
+        self.currentIndex = playIndex;
+    }
+    for (NSURL * url in urls) {
+        [dataSource addObject:[AVPlayerItem playerItemWithURL:url]];
+    }
+    [self setQueuePlayer];
+    [self addPlayerTimeObserver];
+    [self addItemsDidPlayToEndNotifications];
+}
+-(void)addItemsDidPlayToEndNotifications{
+    NSArray *items = self.queuePlayer.items;
+    if (items.count) {
+        for (AVPlayerItem *item in items) {
+            [[NSNotificationCenter defaultCenter] removeObserver:self name:AVPlayerItemDidPlayToEndTimeNotification object:item];
+            [[NSNotificationCenter defaultCenter] addObserver:self
+                                                     selector:@selector(playerItemDidEndPlay:)
+                                                         name:AVPlayerItemDidPlayToEndTimeNotification
+                                                       object:item];
         }
     }
 }
-
-- (void)setUrls:(NSArray<NSURL *> *)urls index:(NSInteger)index {
-    [_playedUrls removeAllObjects];
-    [_nextUrls removeAllObjects];
-    
-    if (urls.count == 0 || urls == nil) {
-        [_queuePlayer removeAllItems];
-        return;
-    }
-    
-    if (index > urls.count) {   //加层保险
-        index = urls.count;
-    }
-    
-    [_playedUrls addObjectsFromArray:[urls subarrayWithRange:NSMakeRange(0, index)]];
-    [_nextUrls addObjectsFromArray:[urls subarrayWithRange:NSMakeRange(index, urls.count - index)]];
-    [_queuePlayer removeAllItems];
-    AVPlayerItem *item = [AVPlayerItem playerItemWithURL:_nextUrls[0]];
-    if ([_queuePlayer canInsertItem:item afterItem:nil]) {
-        [_queuePlayer insertItem:item afterItem:nil];
-    }
-}
-
+//- (void)playAtIndex:(NSInteger)index
+//{
+//    [self.queuePlayer removeAllItems];
+//    for (NSInteger i = index; i <dataSource.count; i ++) {
+//        AVPlayerItem* obj = [playerItems objectAtIndex:i];
+//        if ([self.queuePlayer  canInsertItem:obj afterItem:nil]) {
+//            [obj seekToTime:kCMTimeZero];
+//            [self.queuePlayer  insertItem:obj afterItem:nil];
+//        }
+//    }
+//}
+///上一首⏮
 - (void)lastItem {
 
-    if (_playedUrls.count > 0) {
-        
-        NSURL *url = _playedUrls[0];
-        [_nextUrls insertObject:url atIndex:0];
-        [_playedUrls removeObjectAtIndex:0];
-        [_queuePlayer advanceToNextItem];
-        [_queuePlayer removeAllItems];
-        AVPlayerItem *item = [AVPlayerItem playerItemWithURL:url];
-        if ([_queuePlayer canInsertItem:item afterItem:nil]) {
-            [_queuePlayer insertItem:item afterItem:nil];
-        }
-        [_queuePlayer play];
+    if (dataSource.count > 0) {
+
+        [self.queuePlayer advanceToNextItem];
+//        AVPlayerItem *item = [AVPlayerItem playerItemWithURL:url];
+//        if ([self.queuePlayer canInsertItem:item afterItem:nil]) {
+//            [self.queuePlayer insertItem:item afterItem:nil];
+//        }
+        [self.queuePlayer play];
         _isPlaying = YES;
     }
 }
 
-
+///下一首⏭
 - (void)nextItem {
     
-    if (_nextUrls.count > 1) {
+    if (dataSource.count) {
         [self.queuePlayer advanceToNextItem];
-        [_playedUrls insertObject:_nextUrls[0] atIndex:0];
-        [_nextUrls removeObjectAtIndex:0];
+//        NSArray *items = self.queuePlayer.items;
         
-        NSArray *items = _queuePlayer.items;
-        
-        if (items.count < _nextUrls.count) {
-            NSURL *url = _nextUrls[items.count];
-            AVPlayerItem *item = [AVPlayerItem playerItemWithURL:url];
-            if ([_queuePlayer canInsertItem:item afterItem:nil]) {
-                [_queuePlayer insertItem:item afterItem:nil];
-            }
-        }
+//        if (items.count < _nextUrls.count) {
+//            NSURL *url = _nextUrls[items.count];
+//            AVPlayerItem *item = [AVPlayerItem playerItemWithURL:url];
+//            if ([self.queuePlayer canInsertItem:item afterItem:nil]) {
+//                [self.queuePlayer insertItem:item afterItem:nil];
+//            }
+//        }
         
         _isPlaying = YES;
-        [_queuePlayer play];
+//        [self.queuePlayer play];
     }
 }
 
 - (void)playerItemDidEndPlay:(NSNotification *)tifi {
     _isPlaying = NO;
+    NSLog(@"播放完毕");
     if ([_delegate respondsToSelector:@selector(queuePlayerEndPlayed:)]) {
-        
-        AVPlayerItem *item = tifi.object;
-        
-        [_delegate queuePlayerEndPlayed:item];
+        AVPlayerItem *item = (AVPlayerItem *)tifi.object;
+            [_delegate queuePlayerEndPlayed:item];
     }
-}
-
-- (AVQueuePlayer *)queuePlayer {
-    return _queuePlayer;
 }
 - (NSString *)convertTime:(float)second{
     NSDate *d = [NSDate dateWithTimeIntervalSince1970:second];
