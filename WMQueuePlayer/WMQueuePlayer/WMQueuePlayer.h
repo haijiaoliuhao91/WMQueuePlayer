@@ -11,11 +11,13 @@
 #import <UIKit/UIKit.h>
 #import <AVFoundation/AVFoundation.h>
 
-
+@class WMQueuePlayer;
 @protocol WMQueuePlayerDelegate <NSObject>
 
 @optional
-- (void)queuePlayerEndPlayed:(AVPlayerItem *)item;
+
+- (void)wmQueuePlayer:(WMQueuePlayer *)player itemDidPlayToEnd:(AVPlayerItem *)item;
+- (void)wmQueuePlayer:(WMQueuePlayer *)player itemDidChanged:(AVPlayerItem *)item;
 
 @end
 
@@ -47,6 +49,11 @@
 @property (nonatomic,strong ) UIImageView         *topView;
 
 /**
+ *  显示播放视频的title
+ */
+@property (nonatomic,strong) UILabel        *titleLabel;
+
+/**
  *  WMQueuePlayer内部一个UIView，所有的控件统一管理在此view中
  */
 @property (nonatomic,strong) UIView        *contentView;
@@ -62,18 +69,23 @@
  *  是否正在播放
  */
 @property (nonatomic, assign, readonly) BOOL    isPlaying;
+
+/**
+ *  是否是循环播放
+ */
+@property (nonatomic, assign) BOOL    isLoopPlay;
+
+
 /**
  *  当前播放器播放的视频资源index，如果没有播放，返回-1
  */
 @property (nonatomic, assign) NSInteger    currentIndex;
 
 /**
- *  设置播放列表
- *
- *  @param urls  列表url
- *  @param playIndex  要播放的元素位置，不设置默认为0开始播放
+ *  设置播放视频的URLArray数组，可以是本地的路径也可以是http的网络路径
  */
-- (void)setUrls:(NSArray <NSURL *>*)urls playIndex:(NSInteger)playIndex;
+@property (nonatomic,copy) NSArray<NSURL *> *URLArray;
+
 
 /**
  *  播放上一个
@@ -89,7 +101,10 @@
  *  播放
  */
 - (void)play;
-
+/**
+ *  从第index处播放
+ */
+- (void)playItemAtIndex:(NSInteger)index;
 /**
  *  暂停
  */

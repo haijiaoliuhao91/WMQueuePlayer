@@ -11,7 +11,7 @@
 #import "WMQueuePlayer.h"
 
 
-@interface ViewController ()
+@interface ViewController ()<WMQueuePlayerDelegate>
 @property(nonatomic,retain)WMQueuePlayer *queuePlayer;
 
 @property(nonatomic,strong)NSMutableArray *urlArray;
@@ -24,12 +24,23 @@
 {
     self = [super init];
     if (self) {
-        self.urlArray = [NSMutableArray arrayWithObjects:@"http://ips.ifeng.com/3gs.ifeng.com/userfiles/video02/2014/08/29/2228059-280-068-2342.mp4",
+//        http://baobab.wdjcdn.com/1456653443902B.mp4
+        self.urlArray = [NSMutableArray arrayWithObjects:
+                         @"http://ips.ifeng.com/3gs.ifeng.com/userfiles/video02/2014/08/29/2228059-280-068-2342.mp4",
+                         @"http://baobab.wdjcdn.com/1456317490140jiyiyuetai_x264.mp4",
                          @"http://ips.ifeng.com/3gs.ifeng.com/userfiles/video02/2014/09/01/2233658-280-068-2335.mp4",
-                         @"http://wscdn.alhls.xiaoka.tv/20161115/57c/da6/OM7VL1SYM2L37pF3/index.m3u8",
                          @"http://static.tripbe.com/videofiles/20121214/9533522808.f4v.mp4", nil];
     }
     return self;
+}
+///播放器切换视频的代理
+- (void)wmQueuePlayer:(WMQueuePlayer *)player itemDidChanged:(AVPlayerItem *)item{
+    player.titleLabel.text = [NSString stringWithFormat:@"我是第%li个视频",player.currentIndex];
+}
+///视频播放完成的代理
+
+-(void)wmQueuePlayer:(WMQueuePlayer *)player itemDidPlayToEnd:(AVPlayerItem *)item{
+
 }
 
 - (void)viewDidLoad {
@@ -40,9 +51,11 @@
     for (NSString *aUrlString in self.urlArray) {
         [temURLArray addObject:[NSURL URLWithString:aUrlString]];
     }
-    [_queuePlayer setUrls:temURLArray playIndex:1];
+    [_queuePlayer setURLArray:temURLArray];
+    _queuePlayer.isLoopPlay = NO;//设置循环播放
+    _queuePlayer.delegate = self;
     [self.view addSubview:_queuePlayer];
-    [_queuePlayer play];
+    [_queuePlayer playItemAtIndex:2];
 }
 - (void)didReceiveMemoryWarning {
     [super didReceiveMemoryWarning];
@@ -56,7 +69,7 @@
 //    }else{
 //        [_queuePlayer play];
 //    }
-    
+    [_queuePlayer nextItem];
     return;
     
     NSMutableArray *itemArray = [NSMutableArray array];

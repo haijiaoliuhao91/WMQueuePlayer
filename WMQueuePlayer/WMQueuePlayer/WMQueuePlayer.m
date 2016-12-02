@@ -69,6 +69,8 @@
     self.topView = [[UIImageView alloc]init];
     self.topView.image = WMQueuePlayerImage(@"top_shadow");
     self.topView.userInteractionEnabled = YES;
+//    self.topView.backgroundColor = [UIColor lightGrayColor];
+
     [self.contentView addSubview:self.topView];
     //autoLayout topView
     [self.topView mas_makeConstraints:^(MASConstraintMaker *make) {
@@ -85,7 +87,7 @@
     self.bottomView = [[UIImageView alloc]init];
     self.bottomView.image = WMQueuePlayerImage(@"bottom_shadow");
     self.bottomView.userInteractionEnabled = YES;
-    self.bottomView.backgroundColor = [UIColor lightGrayColor];
+//    self.bottomView.backgroundColor = [UIColor lightGrayColor];
     [self.contentView addSubview:self.bottomView];
     //autoLayout bottomView
     [self.bottomView mas_makeConstraints:^(MASConstraintMaker *make) {
@@ -96,6 +98,24 @@
     }];
     
     
+    
+    //titleLabel
+    self.titleLabel = [[UILabel alloc]init];
+    //    self.titleLabel.textAlignment = NSTextAlignmentCenter;
+    self.titleLabel.textColor = [UIColor whiteColor];
+    self.titleLabel.backgroundColor = [UIColor clearColor];
+    self.titleLabel.numberOfLines = 1;
+    self.titleLabel.font = [UIFont systemFontOfSize:15.0];
+    [self.topView addSubview:self.titleLabel];
+    //autoLayout titleLabel
+    
+    [self.titleLabel mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.left.equalTo(self.topView).with.offset(45);
+        make.right.equalTo(self.topView).with.offset(-45);
+        make.center.equalTo(self.topView);
+        make.top.equalTo(self.topView).with.offset(0);
+        
+    }];
     
     self.playOrPauseBtn = [UIButton buttonWithType:UIButtonTypeCustom];
     self.playOrPauseBtn.showsTouchWhenHighlighted = YES;
@@ -193,15 +213,6 @@
         self.playerLayer.frame = self.bounds;
         self.playerLayer.videoGravity = AVLayerVideoGravityResize;
         [self.contentView.layer insertSublayer:_playerLayer atIndex:0];
-        if (self.currentIndex!=-1) {
-            AVPlayerItem *readyToPlayItem = [dataSource objectAtIndex:self.currentIndex];
-                    AVPlayerItem *currentPlayItem = self.queuePlayer.currentItem;
-                    if ([self.queuePlayer canInsertItem:readyToPlayItem afterItem:currentPlayItem]) {
-                        [self.queuePlayer insertItem:readyToPlayItem afterItem:currentPlayItem];
-                        [self.queuePlayer removeItem:currentPlayItem];
-                        [self play];
-                    }
-        }
     }
 }
 -(void)addPlayerTimeObserver{
@@ -266,13 +277,14 @@
 }
 - (void)fullScreenAction:(UIButton *)sender{
     NSLog(@"fullScreenAction");
-    [self nextItem];
+    [self lastItem];
 }
 - (void)play {
     if (_isPlaying==NO) {
         [self.queuePlayer play];
         self.playOrPauseBtn.selected = NO;
         _isPlaying = YES;
+        self.titleLabel.text = [NSString stringWithFormat:@"%li",self.queuePlayer.items.count];
     }
 }
 - (void)pause {
@@ -313,17 +325,17 @@
     }
     [self addItemsDidPlayToEndNotifications];
 }
-
-- (void)setUrls:(NSArray <NSURL *>*)urls playIndex:(NSInteger)playIndex{
-    if (playIndex) {
-        self.currentIndex = playIndex;
+///设置需要播放数据源数组
+-(void)setURLArray:(NSArray<NSURL *> *)URLArray{
+    
+    if (URLArray.count) {
+        for (NSURL *url in URLArray) {
+            [dataSource addObject:[AVPlayerItem playerItemWithURL:url]];
+        }
+        [self setQueuePlayer];
+        [self addPlayerTimeObserver];
+        [self addItemsDidPlayToEndNotifications];
     }
-    for (NSURL * url in urls) {
-        [dataSource addObject:[AVPlayerItem playerItemWithURL:url]];
-    }
-    [self setQueuePlayer];
-    [self addPlayerTimeObserver];
-    [self addItemsDidPlayToEndNotifications];
 }
 -(void)addItemsDidPlayToEndNotifications{
     NSArray *items = self.queuePlayer.items;
@@ -337,58 +349,83 @@
         }
     }
 }
-//- (void)playAtIndex:(NSInteger)index
-//{
-//    [self.queuePlayer removeAllItems];
-//    for (NSInteger i = index; i <dataSource.count; i ++) {
-//        AVPlayerItem* obj = [playerItems objectAtIndex:i];
-//        if ([self.queuePlayer  canInsertItem:obj afterItem:nil]) {
-//            [obj seekToTime:kCMTimeZero];
-//            [self.queuePlayer  insertItem:obj afterItem:nil];
-//        }
-//    }
-//}
+#pragma mark
+#pragma mark playItemAtIndex
+///从第index处开始播放，index从0开始
+- (void)playItemAtIndex:(NSInteger)index
+{
+    self.currentIndex = index;
+    if (self.queuePlayer.items.count) {
+        [self.queuePlayer removeAllItems];
+    }else{
+        return;
+    }
+    for (NSInteger i = index; i <dataSource.count; i ++) {
+        AVPlayerItem* obj = [dataSource objectAtIndex:i];
+        if ([self.queuePlayer  canInsertItem:obj afterItem:nil]) {
+            [obj seekToTime:kCMTimeZero];
+            [self.queuePlayer  insertItem:obj afterItem:nil];
+           
+        }
+    }
+    if (_isPlaying==NO) {
+        [self play];
+    }
+    if ([self.delegate respondsToSelector:@selector(wmQueuePlayer:itemDidChanged:)]) {
+        [self.delegate wmQueuePlayer:self itemDidChanged:self.queuePlayer.currentItem];
+    }
+    
+}
+#pragma mark
+#pragma mark lastItem
 ///上一首⏮
 - (void)lastItem {
-
-    if (dataSource.count > 0) {
-
-        [self.queuePlayer advanceToNextItem];
-//        AVPlayerItem *item = [AVPlayerItem playerItemWithURL:url];
-//        if ([self.queuePlayer canInsertItem:item afterItem:nil]) {
-//            [self.queuePlayer insertItem:item afterItem:nil];
-//        }
-        [self.queuePlayer play];
-        _isPlaying = YES;
+    if (self.currentIndex==0) {//如果现在播放的为第0个
+        if (self.isLoopPlay) {//如果允许循环播放，那么播放最后一个
+            [self playItemAtIndex:dataSource.count-1];
+        }else{
+            return;
+        }
+    }else{
+        [self playItemAtIndex:--self.currentIndex];
     }
 }
-
+#pragma mark
+#pragma mark nextItem
 ///下一首⏭
 - (void)nextItem {
     
-    if (dataSource.count) {
+    if (self.queuePlayer.items.count>1) {
         [self.queuePlayer advanceToNextItem];
-//        NSArray *items = self.queuePlayer.items;
-        
-//        if (items.count < _nextUrls.count) {
-//            NSURL *url = _nextUrls[items.count];
-//            AVPlayerItem *item = [AVPlayerItem playerItemWithURL:url];
-//            if ([self.queuePlayer canInsertItem:item afterItem:nil]) {
-//                [self.queuePlayer insertItem:item afterItem:nil];
-//            }
-//        }
-        
         _isPlaying = YES;
-//        [self.queuePlayer play];
+        self.currentIndex++;
+        if ([self.delegate respondsToSelector:@selector(wmQueuePlayer:itemDidChanged:)]) {
+            [self.delegate wmQueuePlayer:self itemDidChanged:self.queuePlayer.currentItem];
+        }
+    }else{
+        if (self.isLoopPlay) {//如果设置了循环播放，那么播放第0个
+            [self playItemAtIndex:0];
+        }
     }
+    
 }
-
-- (void)playerItemDidEndPlay:(NSNotification *)tifi {
+#pragma mark 
+#pragma mark playerItemDidEndPlay
+- (void)playerItemDidEndPlay:(NSNotification *)notice {
     _isPlaying = NO;
     NSLog(@"播放完毕");
-    if ([_delegate respondsToSelector:@selector(queuePlayerEndPlayed:)]) {
-        AVPlayerItem *item = (AVPlayerItem *)tifi.object;
-            [_delegate queuePlayerEndPlayed:item];
+
+    if ([self.delegate respondsToSelector:@selector(wmQueuePlayer:itemDidPlayToEnd:)]) {
+        AVPlayerItem *item = (AVPlayerItem *)notice.object;
+        [self.delegate wmQueuePlayer:self itemDidPlayToEnd:item];
+    }
+    
+    if (self.queuePlayer.items.count>1) {//如果>1,说明不是最后一个，还可以下一首
+        [self nextItem];
+    }else{//这里处理最后一首的情况
+        if (self.isLoopPlay) {//先判断是不是设置了循环播放，如果设置了循环播放，那么从第0个开始
+            [self playItemAtIndex:0];
+        }
     }
 }
 - (NSString *)convertTime:(float)second{
