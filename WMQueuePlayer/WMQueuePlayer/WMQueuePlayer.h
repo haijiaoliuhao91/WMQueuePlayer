@@ -72,12 +72,12 @@
 - (void)setUrls:(NSArray <NSURL *>*)urls index:(NSInteger)index;
 
 /**
- *  上一首
+ *  播放上一个
  */
 - (void)lastItem;
 
 /**
- *  下一首
+ *  播放下一个
  */
 - (void)nextItem;
 

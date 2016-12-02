@@ -15,9 +15,9 @@ Pod::Spec.new do |s|
   #  summary should be tweet-length, and the description more in depth.
   #
 
-  s.name         = "WMPlayer"
-  s.version      = "3.0.0"
-  s.summary      = "A lightweight UIView for iOS to play local or network video,base on AVPlayer."
+  s.name         = "WMQueuePlayer"
+  s.version      = “1.0.0”
+  s.summary      = "A lightweight UIView for iOS to play local or network videos,base on AVQueuePlayer."
 
   # This description is used to generate tags and improve search results.
   #   * Think: What does it do? Why did you write it? What is the focus?
@@ -27,7 +27,7 @@ Pod::Spec.new do |s|
   s.description  = <<-DESC
                    A lightweight UIView for iOS to play local or network video,base on AVPlayer.It support fullScreen and small screen.
 		DESC
-  s.homepage     = "https://github.com/zhengwenming/WMPlayer"
+  s.homepage     = "https://github.com/zhengwenming/WMQueuePlayer"
   # s.screenshots  = "https://github.com/zhengwenming/WMPlayer/blob/master/WMPlayer/Resource/WMPlayer.gif"
 
 
@@ -77,7 +77,7 @@ Pod::Spec.new do |s|
   #  Supports git, hg, bzr, svn and HTTP.
   
 
-  s.source       = { :git => "https://github.com/zhengwenming/WMPlayer.git", :tag => "3.0.0" }
+  s.source       = { :git => "https://github.com/zhengwenming/WMQueuePlayer.git", :tag => “1.0.0” }
 
 
   # ――― Source Code ―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――― #
@@ -88,7 +88,7 @@ Pod::Spec.new do |s|
   #  Not including the public_header_files will make all headers public.
   #
 
-  s.source_files  = "WMPlayer/**/*.{h,m}"
+  s.source_files  = "WMQueuePlayer/**/*.{h,m}"
   s.exclude_files = "Classes/Exclude"
 
   # s.public_header_files = "Classes/**/*.h"

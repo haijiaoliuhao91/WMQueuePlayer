@@ -257,6 +257,7 @@
 }
 - (void)fullScreenAction:(UIButton *)sender{
     NSLog(@"fullScreenAction");
+    [self nextItem];
 }
 - (void)play {
     if (_isPlaying==NO) {

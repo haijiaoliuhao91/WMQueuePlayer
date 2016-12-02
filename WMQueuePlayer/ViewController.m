@@ -26,8 +26,8 @@
     if (self) {
         self.urlArray = [NSMutableArray arrayWithObjects:@"http://ips.ifeng.com/3gs.ifeng.com/userfiles/video02/2014/08/29/2228059-280-068-2342.mp4",
                          @"http://ips.ifeng.com/3gs.ifeng.com/userfiles/video02/2014/09/01/2233658-280-068-2335.mp4",
-                         @"http://ips.ifeng.com/3gs.ifeng.com/userfiles/video02/2014/08/29/2228059-280-068-2342.mp4",
-                         @"http://ips.ifeng.com/3gs.ifeng.com/userfiles/video02/2014/08/26/2220447-280-068-2354.mp4", nil];
+                         @"http://wscdn.alhls.xiaoka.tv/20161115/57c/da6/OM7VL1SYM2L37pF3/index.m3u8",
+                         @"http://static.tripbe.com/videofiles/20121214/9533522808.f4v.mp4", nil];
     }
     return self;
 }
