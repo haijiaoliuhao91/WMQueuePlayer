@@ -7,6 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		702B4B5A1DF32ED200166F81 /* WMProgressView.m in Sources */ = {isa = PBXBuildFile; fileRef = 702B4B591DF32ED200166F81 /* WMProgressView.m */; };
+		702B4B5E1DF336D500166F81 /* PlayerViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 702B4B5C1DF336D500166F81 /* PlayerViewController.m */; };
+		702B4B5F1DF336D500166F81 /* PlayerViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 702B4B5D1DF336D500166F81 /* PlayerViewController.xib */; };
 		BF2FE64D1DE2CC8A00D8A23D /* TCQueuePlayerViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = BF2FE64C1DE2CC8A00D8A23D /* TCQueuePlayerViewController.m */; };
 		BF410BE31D90E2C5004039D8 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = BF410BE21D90E2C5004039D8 /* main.m */; };
 		BF410BE61D90E2C5004039D8 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = BF410BE51D90E2C5004039D8 /* AppDelegate.m */; };
@@ -31,6 +34,11 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		702B4B581DF32ED200166F81 /* WMProgressView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = WMProgressView.h; sourceTree = "<group>"; };
+		702B4B591DF32ED200166F81 /* WMProgressView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = WMProgressView.m; sourceTree = "<group>"; };
+		702B4B5B1DF336D500166F81 /* PlayerViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PlayerViewController.h; sourceTree = "<group>"; };
+		702B4B5C1DF336D500166F81 /* PlayerViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PlayerViewController.m; sourceTree = "<group>"; };
+		702B4B5D1DF336D500166F81 /* PlayerViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = PlayerViewController.xib; sourceTree = "<group>"; };
 		BF2FE64B1DE2CC8A00D8A23D /* TCQueuePlayerViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TCQueuePlayerViewController.h; sourceTree = "<group>"; };
 		BF2FE64C1DE2CC8A00D8A23D /* TCQueuePlayerViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TCQueuePlayerViewController.m; sourceTree = "<group>"; };
 		BF410BDE1D90E2C5004039D8 /* WMQueuePlayer.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = WMQueuePlayer.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -110,6 +118,9 @@
 				BF410BE51D90E2C5004039D8 /* AppDelegate.m */,
 				BF410BE71D90E2C5004039D8 /* ViewController.h */,
 				BF410BE81D90E2C5004039D8 /* ViewController.m */,
+				702B4B5B1DF336D500166F81 /* PlayerViewController.h */,
+				702B4B5C1DF336D500166F81 /* PlayerViewController.m */,
+				702B4B5D1DF336D500166F81 /* PlayerViewController.xib */,
 				BF410BF81D90E357004039D8 /* WMQueuePlayer */,
 				BF410BEA1D90E2C5004039D8 /* Main.storyboard */,
 				BF410BED1D90E2C5004039D8 /* Assets.xcassets */,
@@ -138,6 +149,8 @@
 				BF410BFA1D90E472004039D8 /* WMQueuePlayer.bundle */,
 				BF410BFC1D90E4F0004039D8 /* WMQueuePlayer.h */,
 				BF410BFD1D90E4F0004039D8 /* WMQueuePlayer.m */,
+				702B4B581DF32ED200166F81 /* WMProgressView.h */,
+				702B4B591DF32ED200166F81 /* WMProgressView.m */,
 			);
 			path = WMQueuePlayer;
 			sourceTree = "<group>";
@@ -248,6 +261,7 @@
 				BF410BEE1D90E2C5004039D8 /* Assets.xcassets in Resources */,
 				BF410BFB1D90E472004039D8 /* WMQueuePlayer.bundle in Resources */,
 				BF410BEC1D90E2C5004039D8 /* Main.storyboard in Resources */,
+				702B4B5F1DF336D500166F81 /* PlayerViewController.xib in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -264,6 +278,7 @@
 				BF410BE91D90E2C5004039D8 /* ViewController.m in Sources */,
 				BF410BE61D90E2C5004039D8 /* AppDelegate.m in Sources */,
 				BF410BE31D90E2C5004039D8 /* main.m in Sources */,
+				702B4B5A1DF32ED200166F81 /* WMProgressView.m in Sources */,
 				BF7E19B41DE2EDCC00AB8AD0 /* View+MASAdditions.m in Sources */,
 				BF7E19AC1DE2EDCC00AB8AD0 /* MASCompositeConstraint.m in Sources */,
 				BF7E19B01DE2EDCC00AB8AD0 /* MASViewAttribute.m in Sources */,
@@ -274,6 +289,7 @@
 				BF2FE64D1DE2CC8A00D8A23D /* TCQueuePlayerViewController.m in Sources */,
 				BF7E19BB1DE2EDF100AB8AD0 /* FastForwardView.m in Sources */,
 				BF7E19BD1DE2EDF100AB8AD0 /* WMLightView.m in Sources */,
+				702B4B5E1DF336D500166F81 /* PlayerViewController.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

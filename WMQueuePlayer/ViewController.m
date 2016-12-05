@@ -7,83 +7,42 @@
 //
 
 #import "ViewController.h"
-#import "TCQueuePlayerViewController.h"
-#import "WMQueuePlayer.h"
+
+#import "PlayerViewController.h"
+#import "WMProgressView.h"
 
 
-@interface ViewController ()<WMQueuePlayerDelegate>
-@property(nonatomic,retain)WMQueuePlayer *queuePlayer;
-
-@property(nonatomic,strong)NSMutableArray *urlArray;
+@interface ViewController ()
+@property(nonatomic,strong)WMProgressView *progressView;
+@property(nonatomic,assign)CGFloat progress;
 
 @end
 
 @implementation ViewController
 
-- (instancetype)init
-{
-    self = [super init];
-    if (self) {
-//        http://baobab.wdjcdn.com/1456653443902B.mp4
-        self.urlArray = [NSMutableArray arrayWithObjects:
-                         @"http://ips.ifeng.com/3gs.ifeng.com/userfiles/video02/2014/08/29/2228059-280-068-2342.mp4",
-                         @"http://baobab.wdjcdn.com/1456317490140jiyiyuetai_x264.mp4",
-                         @"http://ips.ifeng.com/3gs.ifeng.com/userfiles/video02/2014/09/01/2233658-280-068-2335.mp4",
-                         @"http://static.tripbe.com/videofiles/20121214/9533522808.f4v.mp4", nil];
-    }
-    return self;
+- (IBAction)pushToNextVC:(UIButton *)sender {
+    PlayerViewController *playerVC = [[PlayerViewController alloc]init];
+    [self.navigationController pushViewController:playerVC animated:YES];
 }
-///播放器切换视频的代理
-- (void)wmQueuePlayer:(WMQueuePlayer *)player itemDidChanged:(AVPlayerItem *)item{
-    player.titleLabel.text = [NSString stringWithFormat:@"我是第%li个视频",player.currentIndex];
-}
-///视频播放完成的代理
-
--(void)wmQueuePlayer:(WMQueuePlayer *)player itemDidPlayToEnd:(AVPlayerItem *)item{
-
-}
-
 - (void)viewDidLoad {
+    CGPoint point = self.view.center;
+
     [super viewDidLoad];
-    _queuePlayer = [[WMQueuePlayer alloc]initWithFrame:CGRectMake(0, 65, self.view.bounds.size.width, 0.75*(self.view.bounds.size.width))];
-    _queuePlayer.backgroundColor = [UIColor lightGrayColor];
-    NSMutableArray *temURLArray = [NSMutableArray array];
-    for (NSString *aUrlString in self.urlArray) {
-        [temURLArray addObject:[NSURL URLWithString:aUrlString]];
-    }
-    [_queuePlayer setURLArray:temURLArray];
-    _queuePlayer.isLoopPlay = NO;//设置循环播放
-    _queuePlayer.delegate = self;
-    [self.view addSubview:_queuePlayer];
-    [_queuePlayer playItemAtIndex:2];
+    self.progressView = [[WMProgressView alloc]initWithFrame:CGRectMake(0, point.y+100, self.view.bounds.size.width, 60)];
+    self.progressView.backgroundColor = [UIColor lightGrayColor];
+    [self.view addSubview:self.progressView];
+    
+//    __typeof(self) weakSelf = self;
+//    NSTimer *timer = [NSTimer timerWithTimeInterval:1.0 repeats:YES block:^(NSTimer * _Nonnull timer) {
+//        weakSelf.progressView.value = self.progress++;
+//    }];
+    
+    NSTimer *timer = [NSTimer timerWithTimeInterval:1.0 target:self selector:@selector(progressSetFunc) userInfo:nil repeats:YES];
+//    [[NSRunLoop currentRunLoop]addTimer:timer forMode:NSDefaultRunLoopMode];
+   
 }
-- (void)didReceiveMemoryWarning {
-    [super didReceiveMemoryWarning];
+-(void)progressSetFunc{
+    self.progressView.value = self.progress++/10.0;
 
 }
--(void)touchesBegan:(NSSet<UITouch *> *)touches withEvent:(UIEvent *)event{
-    [super touchesBegan:touches withEvent:event];
-
-//    if (_queuePlayer.isPlaying) {
-//        [_queuePlayer pause];
-//    }else{
-//        [_queuePlayer play];
-//    }
-    [_queuePlayer nextItem];
-    return;
-    
-    NSMutableArray *itemArray = [NSMutableArray array];
-    for (NSString *aString in self.urlArray) {
-        [itemArray addObject:[AVPlayerItem playerItemWithURL:[NSURL URLWithString:aString]]];
-    }
-    
-    
-    
-    
-    TCQueuePlayerViewController *tc=[[TCQueuePlayerViewController alloc]initWithItems:itemArray];
-    [self presentViewController:tc animated:YES completion:^{
-        [tc.player play];
-    }];
-}
-
 @end

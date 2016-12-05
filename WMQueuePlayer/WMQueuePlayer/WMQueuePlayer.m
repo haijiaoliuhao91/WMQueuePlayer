@@ -8,18 +8,20 @@
 
 #import "WMQueuePlayer.h"
 #import "Masonry.h"
+#import "WMProgressView.h"
+
 
 #define WMQueuePlayerSrcName(file) [@"WMQueuePlayer.bundle" stringByAppendingPathComponent:file]
 #define WMQueuePlayerFrameworkSrcName(file) [@"Frameworks/WMQueuePlayer.framework/WMQueuePlayer.bundle" stringByAppendingPathComponent:file]
 
 #define WMQueuePlayerImage(file)      [UIImage imageNamed:WMQueuePlayerSrcName(file)] ? :[UIImage imageNamed:WMQueuePlayerFrameworkSrcName(file)]
 
-@interface WMQueuePlayer ()<UIGestureRecognizerDelegate>{
+@interface WMQueuePlayer ()<UIGestureRecognizerDelegate,WMProgressViewDelegate>{
     NSMutableArray *dataSource;
   }
 //监听播放起状态的监听者
 @property (nonatomic ,strong) id playbackTimeObserver;
-@property (nonatomic, strong) UISlider *progressSlider;
+@property (nonatomic, strong) WMProgressView *progressSlider;
 /**
  *  显示播放时间的UILabel
  */
@@ -152,26 +154,51 @@
     
     
     //slider
-    self.progressSlider = [[UISlider alloc]init];
+    
+//    self.progressSlider = [[UISlider alloc]init];
+//    self.progressSlider.minimumValue = 0.0;
+//    [self.progressSlider setThumbImage:WMQueuePlayerImage(@"dot")  forState:UIControlStateNormal];
+//    self.progressSlider.minimumTrackTintColor = [UIColor greenColor];
+//    self.progressSlider.maximumTrackTintColor = [UIColor whiteColor];
+//    self.progressSlider.backgroundColor = [UIColor clearColor];
+//    self.progressSlider.value = 0.0;//指定初始值
+//    //进度条的拖拽事件
+//    [self.progressSlider addTarget:self action:@selector(stratDragSlide:)  forControlEvents:UIControlEventValueChanged];
+//    //进度条的点击事件
+//    [self.progressSlider addTarget:self action:@selector(updateProgress:) forControlEvents:UIControlEventTouchUpInside];
+//    [self.bottomView addSubview:self.progressSlider];
+//
+//    //autoLayout slider
+//    [self.progressSlider mas_makeConstraints:^(MASConstraintMaker *make) {
+//        make.left.equalTo(self.bottomView).with.offset(45);
+//        make.right.equalTo(self.bottomView).with.offset(-45);
+//        make.center.equalTo(self.bottomView);
+//    }];
+
+    
+    
+    
+    
+    self.progressSlider = [[WMProgressView alloc]initWithFrame:CGRectMake(0, 0, 320,50)];
     self.progressSlider.minimumValue = 0.0;
-    [self.progressSlider setThumbImage:WMQueuePlayerImage(@"dot")  forState:UIControlStateNormal];
-    self.progressSlider.minimumTrackTintColor = [UIColor greenColor];
-    self.progressSlider.maximumTrackTintColor = [UIColor whiteColor];
-    self.progressSlider.backgroundColor = [UIColor clearColor];
+    self.progressSlider.playProgressBackgoundColor = [UIColor whiteColor];
+    self.progressSlider.trackBackgoundColor = [UIColor greenColor];
+    
+//    self.progressSlider.minimumTrackTintColor = [UIColor greenColor];
+//    self.progressSlider.maximumTrackTintColor = [UIColor whiteColor];
+    self.progressSlider.backgroundColor = [UIColor orangeColor];
     self.progressSlider.value = 0.0;//指定初始值
-    //进度条的拖拽事件
-    [self.progressSlider addTarget:self action:@selector(stratDragSlide:)  forControlEvents:UIControlEventValueChanged];
-    //进度条的点击事件
-    [self.progressSlider addTarget:self action:@selector(updateProgress:) forControlEvents:UIControlEventTouchUpInside];
     [self.bottomView addSubview:self.progressSlider];
-
+    
     //autoLayout slider
-    [self.progressSlider mas_makeConstraints:^(MASConstraintMaker *make) {
-        make.left.equalTo(self.bottomView).with.offset(45);
-        make.right.equalTo(self.bottomView).with.offset(-45);
-        make.center.equalTo(self.bottomView);
-    }];
-
+//    [self.progressSlider mas_makeConstraints:^(MASConstraintMaker *make) {
+//        make.left.equalTo(self.bottomView).with.offset(45);
+//        make.right.equalTo(self.bottomView).with.offset(-45);
+//        make.center.equalTo(self.bottomView);
+//    }];
+    
+    
+    
     //leftTimeLabel显示左边的时间进度
     self.leftTimeLabel = [[UILabel alloc]init];
     self.leftTimeLabel.textAlignment = NSTextAlignmentLeft;
@@ -263,14 +290,27 @@
 //    NSTimeInterval duation = CMTimeGetSeconds(currentItem.duration);
     return [self.queuePlayer.currentItem duration];
 }
+// 开始拖动
+- (void)beiginSliderScrubbing{
+    self.isDragingSlider = YES;
 
+}
+// 结束拖动
+- (void)endSliderScrubbing{
+    self.isDragingSlider = NO;
+    [self.queuePlayer seekToTime:CMTimeMakeWithSeconds(self.progressSlider.value,self.queuePlayer.currentItem.currentTime.timescale)];
+}
+// 拖动值发生改变
+- (void)sliderScrubbing{
+    
+}
 #pragma mark
 #pragma mark--开始拖曳sidle
 - (void)stratDragSlide:(UISlider *)slider{
     self.isDragingSlider = YES;
 }
 #pragma mark
-#pragma mark - 播放进度
+#pragma mark - 播放进度,点击事件
 - (void)updateProgress:(UISlider *)slider{
     self.isDragingSlider = NO;
     [self.queuePlayer seekToTime:CMTimeMakeWithSeconds(slider.value,self.queuePlayer.currentItem.currentTime.timescale)];
