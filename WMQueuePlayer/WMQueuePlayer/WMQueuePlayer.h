@@ -10,7 +10,20 @@
 #import <MediaPlayer/MediaPlayer.h>
 #import <UIKit/UIKit.h>
 #import <AVFoundation/AVFoundation.h>
-
+// 枚举值，包含播放器左上角的关闭按钮的类型
+typedef NS_ENUM(NSInteger, CloseBtnStyle){
+    CloseBtnStylePop, //pop箭头<-
+    CloseBtnStyleClose  //关闭（X）
+};
+// 播放器的几种状态
+typedef NS_ENUM(NSInteger, WMQueuePlayerState) {
+    WMQueuePlayerStateFailed,        // 播放失败
+    WMQueuePlayerStateBuffering,     // 缓冲中
+    WMQueuePlayerStatePlaying,       // 播放中
+    WMQueuePlayerStateStopped,        //暂停播放
+    WMQueuePlayerStateFinished,        //暂停播放
+    WMQueuePlayerStatePause,       // 暂停播放
+};
 @class WMQueuePlayer;
 @protocol WMQueuePlayerDelegate <NSObject>
 
@@ -37,7 +50,10 @@
  */
 @property (nonatomic,retain ) AVPlayerLayer  *playerLayer;
 
-
+/**
+ ＊  播放器左上角按钮的类型
+ */
+@property (nonatomic, assign) CloseBtnStyle   closeBtnStyle;
 
 /**
  *  底部操作工具栏
@@ -66,6 +82,10 @@
  */
 @property (nonatomic,retain ) UIButton       *playOrPauseBtn;
 /**
+ *  左上角关闭按钮
+ */
+@property (nonatomic,retain ) UIButton       *closeBtn;
+/**
  *  是否正在播放
  */
 @property (nonatomic, assign, readonly) BOOL    isPlaying;
@@ -75,7 +95,10 @@
  */
 @property (nonatomic, assign) BOOL    isLoopPlay;
 
-
+/**
+ ＊  播放器状态
+ */
+@property (nonatomic, assign) WMQueuePlayerState   state;
 /**
  *  当前播放器播放的视频资源index，如果没有播放，返回-1
  */

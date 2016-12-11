@@ -42,17 +42,19 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];
-    _queuePlayer = [[WMQueuePlayer alloc]initWithFrame:CGRectMake(0, 65, self.view.bounds.size.width, 0.75*(self.view.bounds.size.width))];
+    _queuePlayer = [[WMQueuePlayer alloc]initWithFrame:CGRectMake(0, 65, [UIScreen mainScreen].bounds.size.width ,200)];
     _queuePlayer.backgroundColor = [UIColor lightGrayColor];
     NSMutableArray *temURLArray = [NSMutableArray array];
     for (NSString *aUrlString in self.urlArray) {
         [temURLArray addObject:[NSURL URLWithString:aUrlString]];
     }
     [_queuePlayer setURLArray:temURLArray];
-    _queuePlayer.isLoopPlay = NO;//设置循环播放
+    _queuePlayer.isLoopPlay = YES;//设置循环播放
     _queuePlayer.delegate = self;
     [self.view addSubview:_queuePlayer];
-    [_queuePlayer playItemAtIndex:2];
+//    [_queuePlayer playItemAtIndex:2];
+    [_queuePlayer play];
+
 }
 - (void)didReceiveMemoryWarning {
     [super didReceiveMemoryWarning];
@@ -82,5 +84,8 @@
         [tc.player play];
     }];
 }
-
+- (void)dealloc
+{
+    NSLog(@"PlayerViewController deallco");
+}
 @end
