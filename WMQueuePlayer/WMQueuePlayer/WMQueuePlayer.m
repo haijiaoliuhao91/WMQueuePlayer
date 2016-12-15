@@ -19,30 +19,53 @@ static void *PlayViewStatusObservationContext = &PlayViewStatusObservationContex
 
 @interface WMQueuePlayer ()<UIGestureRecognizerDelegate>{
     NSMutableArray<AVPlayerItem* > *dataSource;
-    CGFloat currentItemDuration;
-    BOOL hasFailedOrNot;//是不是有播放失败
+    CGFloat currentItemDuration;    //当前播放item的时长
+    BOOL    hasFailedOrNot;         //是不是有播放失败
   }
-//监听播放起状态的监听者
-@property (nonatomic ,strong) id playbackTimeObserver;
-//显示缓冲进度
+/**
+ *  监听播放起状态的监听者
+ */
+@property (nonatomic,strong) id playbackTimeObserver;
+
+/**
+ *  显示缓冲进度
+ */
 @property (nonatomic,strong) UIProgressView *loadingProgress;
-//进度滑块
+
+/**
+ *  进度滑块
+ */
 @property (nonatomic, strong) UISlider *progressSlider;
+
+/**
+ *  当前播放器播放的视频资源index，如果没有播放，返回0
+ */
+@property (nonatomic, assign) NSInteger    currentIndex;
+
 /**
  *  显示播放时间的UILabel
  */
 @property (nonatomic,strong) UILabel         *leftTimeLabel;
 @property (nonatomic,strong) UILabel         *rightTimeLabel;
+
+/**
+ *  为显示时间进行格式化的dateFormatter
+ */
 @property (nonatomic,strong) NSDateFormatter *dateFormatter;
-@property (nonatomic,assign) BOOL isDragingSlider;//是否正在拖曳UISlider，默认为NO
+
+/**
+ *  是否正在拖曳UISlider，默认为NO
+ */
+@property (nonatomic,assign) BOOL isDragingSlider;
+
 /**
  *  菊花（加载框）
  */
 @property (nonatomic,strong) UIActivityIndicatorView *loadingView;
+
 /**
  *  显示加载失败的UILabel
  */
-
 @property (nonatomic,strong) UILabel        *loadFailedLabel;
 @end
 
@@ -686,7 +709,7 @@ static void *PlayViewStatusObservationContext = &PlayViewStatusObservationContex
 #pragma mark
 #pragma mark playItemAtIndex  播放第index个视频
 
-- (void)playItemAtIndex:(NSInteger)index
+- (void)playAtIndex:(NSInteger)index
 {
     self.currentIndex = index;
     if (self.queuePlayer.items.count) {
@@ -716,14 +739,14 @@ static void *PlayViewStatusObservationContext = &PlayViewStatusObservationContex
         if (self.currentIndex==0) {//如果现在播放的为第0个
             if (self.isLoopPlay) {//如果允许循环播放，那么播放最后一个
                     [self removeKVO2CurrentItem];//先移除旧的
-                    [self playItemAtIndex:dataSource.count-1];
+                    [self playAtIndex:dataSource.count-1];
                     hasFailedOrNot = NO;               
             }else{
                 return;
             }
         }else{
             [self removeKVO2CurrentItem];//先移除旧的
-            [self playItemAtIndex:--self.currentIndex];
+            [self playAtIndex:--self.currentIndex];
             hasFailedOrNot = NO;
         }
 }
@@ -745,7 +768,7 @@ static void *PlayViewStatusObservationContext = &PlayViewStatusObservationContex
         }else{
             if (self.isLoopPlay) {//如果设置了循环播放，那么播放第0个
                 [self removeKVO2CurrentItem];//先移除旧的
-                [self playItemAtIndex:0];
+                [self playAtIndex:0];
                 hasFailedOrNot = NO;
 
             }
@@ -766,7 +789,7 @@ static void *PlayViewStatusObservationContext = &PlayViewStatusObservationContex
         [self nextItem];
     }else{//这里处理最后一首的情况
         if (self.isLoopPlay) {//先判断是不是设置了循环播放，如果设置了循环播放，那么从第0个开始
-            [self playItemAtIndex:0];
+            [self playAtIndex:0];
         }
     }
 }

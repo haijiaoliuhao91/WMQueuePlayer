@@ -75,19 +75,19 @@
     //    }
     [_queuePlayer nextItem];
     return;
-    
-    NSMutableArray *itemArray = [NSMutableArray array];
-    for (NSString *aString in self.urlArray) {
-        [itemArray addObject:[AVPlayerItem playerItemWithURL:[NSURL URLWithString:aString]]];
-    }
-    
-    
-    
-    
-    TCQueuePlayerViewController *tc=[[TCQueuePlayerViewController alloc]initWithItems:itemArray];
-    [self presentViewController:tc animated:YES completion:^{
-        [tc.player play];
-    }];
+
+//    NSMutableArray *itemArray = [NSMutableArray array];
+//    for (NSString *aString in self.urlArray) {
+//        [itemArray addObject:[AVPlayerItem playerItemWithURL:[NSURL URLWithString:aString]]];
+//    }
+//    
+//    
+//    
+//    
+//    TCQueuePlayerViewController *tc=[[TCQueuePlayerViewController alloc]initWithItems:itemArray];
+//    [self presentViewController:tc animated:YES completion:^{
+//        [tc.player play];
+//    }];
 }
 - (void)dealloc
 {
