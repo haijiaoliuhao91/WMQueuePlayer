@@ -25,12 +25,48 @@ typedef NS_ENUM(NSInteger, WMQueuePlayerState) {
     WMQueuePlayerStatePause,       // 暂停播放
 };
 @class WMQueuePlayer;
+
+
 @protocol WMQueuePlayerDelegate <NSObject>
 
 @optional
 
-- (void)wmQueuePlayer:(WMQueuePlayer *)player itemDidPlayToEnd:(AVPlayerItem *)item;
-- (void)wmQueuePlayer:(WMQueuePlayer *)player itemDidChanged:(AVPlayerItem *)item;
+/**
+ WMQueuePlayer的当前item播放完毕后调用的代理方法
+
+ @param player 播放器对象
+ @param item 当前播放的AVPlayerItem对象
+ @param currentIndex 播放器播放的item在dataSource中的index
+ */
+- (void)wmQueuePlayer:(WMQueuePlayer *)player itemDidPlayToEnd:(AVPlayerItem *)item index:(NSInteger )currentIndex;
+
+
+/**
+ WMQueuePlayer的当前item被切换为另一个item时候调用的代理方法
+
+ @param player 播放器对象
+ @param item 当前播放的AVPlayerItem对象
+ @param currentIndex 播放器播放的item在dataSource中的index
+ */
+- (void)wmQueuePlayer:(WMQueuePlayer *)player itemDidChanged:(AVPlayerItem *)item index:(NSInteger )currentIndex;
+
+/**
+ WMQueuePlayer中的item加载完毕，内部解码成功，可以播放的时候调用的代理方法
+
+ @param player 播放器对象
+ @param item 当前播放的AVPlayerItem对象
+ @param currentIndex 播放器播放的item在dataSource中的index
+ */
+- (void)wmQueuePlayer:(WMQueuePlayer *)player itemReadyToPlay:(AVPlayerItem *)item index:(NSInteger )currentIndex;
+
+/**
+ WMQueuePlayer中的closeBtn(关闭按钮)被点击后调用的代理方法
+
+ @param player 播放器对象
+ @param closeBtn 关闭按钮对象
+ @param currentIndex 播放器播放的item在dataSource中的index
+ */
+- (void)wmQueuePlayer:(WMQueuePlayer *)player didClickedColsedBtn:(UIButton *)closeBtn index:(NSInteger )currentIndex;
 
 @end
 

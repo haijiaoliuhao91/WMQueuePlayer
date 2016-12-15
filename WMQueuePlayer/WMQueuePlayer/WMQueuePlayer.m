@@ -18,8 +18,9 @@
 static void *PlayViewStatusObservationContext = &PlayViewStatusObservationContext;
 
 @interface WMQueuePlayer ()<UIGestureRecognizerDelegate>{
-    NSMutableArray *dataSource;
+    NSMutableArray<AVPlayerItem* > *dataSource;
     CGFloat currentItemDuration;
+    BOOL hasFailedOrNot;//是不是有播放失败
   }
 //监听播放起状态的监听者
 @property (nonatomic ,strong) id playbackTimeObserver;
@@ -30,10 +31,10 @@ static void *PlayViewStatusObservationContext = &PlayViewStatusObservationContex
 /**
  *  显示播放时间的UILabel
  */
-@property (nonatomic,strong) UILabel        *leftTimeLabel;
-@property (nonatomic,strong) UILabel        *rightTimeLabel;
-@property (nonatomic, strong)NSDateFormatter *dateFormatter;
-@property (nonatomic, assign) BOOL isDragingSlider;//是否正在拖曳UISlider，默认为NO
+@property (nonatomic,strong) UILabel         *leftTimeLabel;
+@property (nonatomic,strong) UILabel         *rightTimeLabel;
+@property (nonatomic,strong) NSDateFormatter *dateFormatter;
+@property (nonatomic,assign) BOOL isDragingSlider;//是否正在拖曳UISlider，默认为NO
 /**
  *  菊花（加载框）
  */
@@ -304,13 +305,14 @@ static void *PlayViewStatusObservationContext = &PlayViewStatusObservationContex
     
     self.rightTimeLabel.text = [self convertTime:0.0];//设置默认值
     dataSource = [NSMutableArray array];
-    self.currentIndex = -1;
+    self.currentIndex = 0;
+    hasFailedOrNot = NO;//设置默认值，没有播放失败的
 }
 #pragma mark
 #pragma mark - 关闭按钮点击func
 -(void)colseTheVideo:(UIButton *)sender{
-    if (self.delegate&&[self.delegate respondsToSelector:@selector(wmplayer:clickedCloseButton:)]) {
-//        [self.delegate wmplayer:self clickedCloseButton:sender];
+    if (self.delegate&&[self.delegate respondsToSelector:@selector(wmQueuePlayer:didClickedColsedBtn:index:)]) {
+        [self.delegate wmQueuePlayer:self didClickedColsedBtn:sender index:self.currentIndex];
     }
 }
 -(void)setQueuePlayer{
@@ -418,7 +420,6 @@ static void *PlayViewStatusObservationContext = &PlayViewStatusObservationContex
         [self.queuePlayer play];
         self.playOrPauseBtn.selected = NO;
         _isPlaying = YES;
-        self.titleLabel.text = [NSString stringWithFormat:@"%li",self.queuePlayer.items.count];
         [self addKVO2CurrentItem];
     }
 }
@@ -448,8 +449,6 @@ static void *PlayViewStatusObservationContext = &PlayViewStatusObservationContex
 }
 
 - (void)addUrls:(NSArray<NSURL *> *)urls {
-    
-    
     NSArray *playItems = _queuePlayer.items;
     if (playItems.count == 0) {
         
@@ -474,7 +473,9 @@ static void *PlayViewStatusObservationContext = &PlayViewStatusObservationContex
 }
 //为currentItem添加kvo
 -(void)addKVO2CurrentItem{
-    AVPlayerItem *currentItem = self.queuePlayer.currentItem;
+
+    AVPlayerItem *currentItem = hasFailedOrNot?[dataSource objectAtIndex:self.currentIndex]:self.queuePlayer.currentItem;
+
     if (currentItem) {
         [currentItem addObserver:self
                        forKeyPath:@"status"
@@ -493,15 +494,13 @@ static void *PlayViewStatusObservationContext = &PlayViewStatusObservationContex
 }
 //为currentItem移除kvo
 -(void)removeKVO2CurrentItem{
-    AVPlayerItem *currentItem = self.queuePlayer.currentItem;
+    AVPlayerItem *currentItem = hasFailedOrNot?[dataSource objectAtIndex:self.currentIndex]:self.queuePlayer.currentItem;
     if (currentItem) {
         [currentItem removeObserver:self forKeyPath:@"status"];
         [currentItem removeObserver:self forKeyPath:@"loadedTimeRanges"];
         [currentItem removeObserver:self forKeyPath:@"playbackBufferEmpty"];
         [currentItem removeObserver:self forKeyPath:@"playbackLikelyToKeepUp"];
         [currentItem removeObserver:self forKeyPath:@"duration"];
-        
-
     }
 }
 -(void)addItemsDidPlayToEndNotifications{
@@ -568,6 +567,12 @@ static void *PlayViewStatusObservationContext = &PlayViewStatusObservationContex
 //                        [self.delegate wmplayerReadyToPlay:self WMPlayerStatus:WMPlayerStatePlaying];
 //                    }
                     //here
+
+                    
+                    if (self.delegate&&[self.delegate respondsToSelector:@selector(wmQueuePlayer:itemReadyToPlay:index:)]) {
+                        [self.delegate wmQueuePlayer:self itemReadyToPlay:self.queuePlayer.currentItem index:self.currentIndex];
+                    }
+                    
                     
                     [self.loadingView stopAnimating];
                     // 跳到xx秒播放视频
@@ -592,8 +597,9 @@ static void *PlayViewStatusObservationContext = &PlayViewStatusObservationContex
                         [self bringSubviewToFront:self.loadFailedLabel];
                         //here
                         [self.loadingView stopAnimating];
+                        hasFailedOrNot = YES;
                         [self pause];
-                        [self.playerLayer removeFromSuperlayer];
+                        return;
                     }
                     NSLog(@"视频加载失败===%@",error.description);
                 }
@@ -605,6 +611,8 @@ static void *PlayViewStatusObservationContext = &PlayViewStatusObservationContex
                 currentItemDuration = (CGFloat)CMTimeGetSeconds(self.queuePlayer.currentItem.duration);
                 self.progressSlider.maximumValue = currentItemDuration;
                 self.state = WMQueuePlayerStatePlaying;
+                [self.loadingView stopAnimating];
+
             }
         }
         else if ([keyPath isEqualToString:@"loadedTimeRanges"]) {
@@ -632,9 +640,7 @@ static void *PlayViewStatusObservationContext = &PlayViewStatusObservationContex
             //here
             [self.loadingView stopAnimating];
             // 当缓冲好的时候
-            if (self.queuePlayer.currentItem.playbackLikelyToKeepUp && self.state == WMQueuePlayerStateBuffering){
-                NSLog(@"55555%s WMPlayerStatePlaying",__FUNCTION__);
-                
+            if (self.queuePlayer.currentItem.playbackLikelyToKeepUp && self.state == WMQueuePlayerStateBuffering){                
                 self.state = WMQueuePlayerStatePlaying;
             }
             
@@ -678,15 +684,13 @@ static void *PlayViewStatusObservationContext = &PlayViewStatusObservationContex
 }
 
 #pragma mark
-#pragma mark playItemAtIndex
-///从第index处开始播放，index从0开始
+#pragma mark playItemAtIndex  播放第index个视频
+
 - (void)playItemAtIndex:(NSInteger)index
 {
     self.currentIndex = index;
     if (self.queuePlayer.items.count) {
         [self.queuePlayer removeAllItems];
-    }else{
-        return;
     }
     for (NSInteger i = index; i <dataSource.count; i ++) {
         AVPlayerItem* obj = [dataSource objectAtIndex:i];
@@ -699,49 +703,53 @@ static void *PlayViewStatusObservationContext = &PlayViewStatusObservationContex
     if (_isPlaying==NO) {
         [self play];
     }
-    if ([self.delegate respondsToSelector:@selector(wmQueuePlayer:itemDidChanged:)]) {
-        [self.delegate wmQueuePlayer:self itemDidChanged:self.queuePlayer.currentItem];
+    if ([self.delegate respondsToSelector:@selector(wmQueuePlayer:itemDidChanged:index:)]) {
+        [self.delegate wmQueuePlayer:self itemDidChanged:self.queuePlayer.currentItem index:self.currentIndex];
     }
     
 }
 #pragma mark
 #pragma mark lastItem 上一首⏮
 - (void)lastItem {
-    _isPlaying = NO;
-    if (self.currentIndex==0) {//如果现在播放的为第0个
-        if (self.isLoopPlay) {//如果允许循环播放，那么播放最后一个
-            [self removeKVO2CurrentItem];//先移除旧的
-            [self playItemAtIndex:dataSource.count-1];
+    self.loadFailedLabel.hidden = YES;
+        _isPlaying = NO;
+        if (self.currentIndex==0) {//如果现在播放的为第0个
+            if (self.isLoopPlay) {//如果允许循环播放，那么播放最后一个
+                    [self removeKVO2CurrentItem];//先移除旧的
+                    [self playItemAtIndex:dataSource.count-1];
+                    hasFailedOrNot = NO;               
+            }else{
+                return;
+            }
         }else{
-            return;
+            [self removeKVO2CurrentItem];//先移除旧的
+            [self playItemAtIndex:--self.currentIndex];
+            hasFailedOrNot = NO;
         }
-    }else{
-        [self removeKVO2CurrentItem];//先移除旧的
-
-        [self playItemAtIndex:--self.currentIndex];
-    }
 }
 #pragma mark
 #pragma mark nextItem 下一首⏭
 - (void)nextItem {
-    _isPlaying = NO;
-
-    if (self.queuePlayer.items.count>1) {//大于1个视频，2个以上，说明之前添加过kvo
-        [self removeKVO2CurrentItem];//先移除旧的
-        [self.queuePlayer advanceToNextItem];
-        [self addKVO2CurrentItem];//添加新的
-        _isPlaying = YES;
-        self.currentIndex++;
-        if ([self.delegate respondsToSelector:@selector(wmQueuePlayer:itemDidChanged:)]) {
-            [self.delegate wmQueuePlayer:self itemDidChanged:self.queuePlayer.currentItem];
-        }
-    }else{
-        if (self.isLoopPlay) {//如果设置了循环播放，那么播放第0个
+    self.loadFailedLabel.hidden = YES;
+        _isPlaying = NO;
+        if (self.queuePlayer.items.count>1) {//大于1个视频，2个以上，说明之前添加过kvo
             [self removeKVO2CurrentItem];//先移除旧的
-            [self playItemAtIndex:0];
+            [self.queuePlayer advanceToNextItem];
+            [self addKVO2CurrentItem];//添加新的
+            _isPlaying = YES;
+            hasFailedOrNot = NO;
+            self.currentIndex++;
+            if ([self.delegate respondsToSelector:@selector(wmQueuePlayer:itemDidChanged:index:)]) {
+                [self.delegate wmQueuePlayer:self itemDidChanged:self.queuePlayer.currentItem index:self.currentIndex];
+            }
+        }else{
+            if (self.isLoopPlay) {//如果设置了循环播放，那么播放第0个
+                [self removeKVO2CurrentItem];//先移除旧的
+                [self playItemAtIndex:0];
+                hasFailedOrNot = NO;
+
+            }
         }
-    }
-    
 }
 #pragma mark 
 #pragma mark playerItemDidEndPlay
@@ -749,9 +757,9 @@ static void *PlayViewStatusObservationContext = &PlayViewStatusObservationContex
     _isPlaying = NO;
     NSLog(@"播放完毕");
 
-    if ([self.delegate respondsToSelector:@selector(wmQueuePlayer:itemDidPlayToEnd:)]) {
+    if ([self.delegate respondsToSelector:@selector(wmQueuePlayer:itemDidPlayToEnd:index:)]) {
         AVPlayerItem *item = (AVPlayerItem *)notice.object;
-        [self.delegate wmQueuePlayer:self itemDidPlayToEnd:item];
+        [self.delegate wmQueuePlayer:self itemDidPlayToEnd:item index:self.currentIndex];
     }
     
     if (self.queuePlayer.items.count>1) {//如果>1,说明不是最后一个，还可以下一首

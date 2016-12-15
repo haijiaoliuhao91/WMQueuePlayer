@@ -22,24 +22,29 @@
     if (self) {
         //        http://baobab.wdjcdn.com/1456653443902B.mp4
         self.urlArray = [NSMutableArray arrayWithObjects:
-                         @"http://ips.ifeng.com/3gs.ifeng.com/userfiles/video02/2014/08/29/2228059-280-068-2342.mp4",
+                         @"http://flv2.bn.netease.com/videolib3/1612/15/SVhGb9739/SD/movie_index.m3u8",
                          @"http://baobab.wdjcdn.com/1456317490140jiyiyuetai_x264.mp4",
                          @"http://ips.ifeng.com/3gs.ifeng.com/userfiles/video02/2014/09/01/2233658-280-068-2335.mp4",
+                         @"http://flv2.bn.netease.com/tvmrepo/2016/12/L/I/EC7BA65LI/SD/movie_index.m3u8",
                          @"http://static.tripbe.com/videofiles/20121214/9533522808.f4v.mp4", nil];
     }
     return self;
 }
 
 ///播放器切换视频的代理
-- (void)wmQueuePlayer:(WMQueuePlayer *)player itemDidChanged:(AVPlayerItem *)item{
-    player.titleLabel.text = [NSString stringWithFormat:@"我是第%li个视频",player.currentIndex];
+-(void)wmQueuePlayer:(WMQueuePlayer *)player itemDidChanged:(AVPlayerItem *)item index:(NSInteger)currentIndex{
 }
 ///视频播放完成的代理
-
--(void)wmQueuePlayer:(WMQueuePlayer *)player itemDidPlayToEnd:(AVPlayerItem *)item{
+-(void)wmQueuePlayer:(WMQueuePlayer *)player itemDidPlayToEnd:(AVPlayerItem *)item index:(NSInteger)currentIndex{
     
 }
 
+-(void)wmQueuePlayer:(WMQueuePlayer *)player itemReadyToPlay:(AVPlayerItem *)item index:(NSInteger)currentIndex{
+    player.titleLabel.text = [NSString stringWithFormat:@"我是第%li个视频",currentIndex];
+}
+- (void)wmQueuePlayer:(WMQueuePlayer *)player didClickedColsedBtn:(UIButton *)closeBtn index:(NSInteger )currentIndex{
+    [self.navigationController popViewControllerAnimated:YES];
+}
 - (void)viewDidLoad {
     [super viewDidLoad];
     _queuePlayer = [[WMQueuePlayer alloc]initWithFrame:CGRectMake(0, 65, [UIScreen mainScreen].bounds.size.width ,200)];
